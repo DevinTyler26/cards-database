@@ -13,7 +13,7 @@ const card: Card = {
 		pt: "Beedrill V",
 		de: "Bibor V"
 	},
-
+	illustrator: "Ayaka Yoshida",
 	rarity: "Holo Rare V",
 	category: "Pokemon",
 	hp: 210,
