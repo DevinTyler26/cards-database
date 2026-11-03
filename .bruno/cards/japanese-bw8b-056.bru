@@ -1,0 +1,25 @@
+meta {
+  name: Japanese BW8b-056 printing metadata
+  type: http
+  seq: 35
+}
+
+get {
+  url: {{BASE_URL}}/v2/ja/cards/BW8b-056
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq BW8b-056
+  res.body.name: eq ダストダス
+  res.body.illustrator: eq Ayaka Yoshida
+  res.body.hp: eq 100
+  res.body.set.id: eq BW8b
+  res.body.variants.normal: eq false
+  res.body.variants.holo: eq true
+  res.body.variants.reverse: eq false
+  res.body.variants.firstEdition: eq true
+  res.body.variants_detailed.length: eq 2
+}

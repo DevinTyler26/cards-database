@@ -1,0 +1,24 @@
+meta {
+  name: Japanese BW8b-055 printing metadata
+  type: http
+  seq: 34
+}
+
+get {
+  url: {{BASE_URL}}/v2/ja/cards/BW8b-055
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq BW8b-055
+  res.body.name: eq アララギ博士
+  res.body.illustrator: eq Kanako Eo
+  res.body.set.id: eq BW8b
+  res.body.variants.normal: eq false
+  res.body.variants.holo: eq true
+  res.body.variants.reverse: eq false
+  res.body.variants.firstEdition: eq true
+  res.body.variants_detailed.length: eq 2
+}

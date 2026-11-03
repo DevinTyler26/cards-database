@@ -11,6 +11,8 @@ on:
 
 jobs:
   card-info-comment:
+    # This inherited bot requires upstream credentials and is not used by our fork.
+    if: github.repository == 'tcgdex/cards-database'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:

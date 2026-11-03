@@ -11,38 +11,49 @@ on:
 env:
   CI: true
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    permissions: {}
+    timeout-minutes: 45
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-15-intel]
 
     steps:
     - name: Checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with:
         persist-credentials: false
+        fetch-depth: 0
 
     - name: Setup BunJS
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+      with:
+        bun-version: 1.4.4
 
     - name: Install deps
       run: |
-        bun install -g @usebruno/cli
+        bun install -g @usebruno/cli@4.3.0
         bun install --frozen-lockfile
         cd server
         bun install --frozen-lockfile
         bun run compile
 
-    - name: Validate the data & the server
+    - name: Validate international/Asian data and the server
       env:
-        NODE_OPTIONS: --max-old-space-size=4096
+        NODE_OPTIONS: --max-old-space-size=8192
+        GOMEMLIMIT: 8GiB
+        GOGC: 50
+        ASIAN_DIFF_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      shell: bash
       run: |
         bun run validate
+        bun run test:asia-validation
+        bun run validate:asia-changes --base "$ASIAN_DIFF_BASE"
         cd server
         bun run --bun validate
 
@@ -50,11 +61,23 @@ jobs:
       shell: bash
       env:
         NODE_OPTIONS: --max-old-space-size=4096
+        MAX_WORKERS: 1
       run: |
         set -euo pipefail
         cd server
-        bun run start &
+        # Keep verbose query dumps out of the Actions log transport during timing checks.
+        SERVER_LOG="$RUNNER_TEMP/tcgdex-server.log"
+        bun src/index.ts > "$SERVER_LOG" 2>&1 &
         SERVER_PID=$!
+        cleanup() {
+          RESULT=$?
+          kill "$SERVER_PID" 2>/dev/null || true
+          if [ "$RESULT" -ne 0 ]; then
+            tail -n 100 "$SERVER_LOG"
+          fi
+          exit "$RESULT"
+        }
+        trap cleanup EXIT
         cd ..
 
         ATTEMPTS=0
@@ -69,6 +92,6 @@ jobs:
         done
 
         cd .bruno
-        bru run --env Developpement
+        bru run -r --env Developpement
 
         kill $SERVER_PID

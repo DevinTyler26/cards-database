@@ -1,0 +1,21 @@
+meta {
+  name: Japanese BW8b complete card membership
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{BASE_URL}}/v2/ja/sets/BW8b
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq BW8b
+  res.body.cardCount.official: eq 51
+  res.body.cardCount.total: eq 58
+  res.body.cards.length: eq 58
+  res.body.cards[0].id: eq BW8b-001
+  res.body.cards[57].id: eq BW8b-058
+}

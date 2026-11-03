@@ -1,0 +1,26 @@
+meta {
+  name: Japanese BW3b-057 printing metadata
+  type: http
+  seq: 32
+}
+
+get {
+  url: {{BASE_URL}}/v2/ja/cards/BW3b-057
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq BW3b-057
+  res.body.name: eq シャンデラ
+  res.body.hp: eq 130
+  res.body.types[0]: eq Psychic
+  res.body.abilities[0].name: eq のろいのかげ
+  res.body.set.id: eq BW3b
+  res.body.variants.normal: eq false
+  res.body.variants.holo: eq true
+  res.body.variants.reverse: eq false
+  res.body.variants.firstEdition: eq true
+  res.body.variants_detailed.length: eq 2
+}
