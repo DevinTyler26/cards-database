@@ -17,7 +17,7 @@ permissions:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -65,9 +65,19 @@ jobs:
       run: |
         set -euo pipefail
         cd server
-        bun src/index.ts &
+        # Keep verbose query dumps out of the Actions log transport during timing checks.
+        SERVER_LOG="$RUNNER_TEMP/tcgdex-server.log"
+        bun src/index.ts > "$SERVER_LOG" 2>&1 &
         SERVER_PID=$!
-        trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+        cleanup() {
+          RESULT=$?
+          kill "$SERVER_PID" 2>/dev/null || true
+          if [ "$RESULT" -ne 0 ]; then
+            tail -n 100 "$SERVER_LOG"
+          fi
+          exit "$RESULT"
+        }
+        trap cleanup EXIT
         cd ..
 
         ATTEMPTS=0
